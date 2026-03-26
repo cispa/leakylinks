@@ -1,0 +1,113 @@
+services:
+  leakylinks:
+    build: .
+    container_name: leakylinks
+    command: bash -lc "\
+      set -euo pipefail; \
+      mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix; \
+      rm -f /tmp/.X100-lock /tmp/.X150-lock || true; \
+      pkill Xvfb || true; \
+      Xvfb :100 -screen 0 1920x1080x24 & \
+      ln -sf /usr/bin/chromium /usr/bin/google-chrome || true; \
+      CHROME_VER=$$(chromedriver --version | awk '{print $$2}'); \
+      WDM_DIR=/root/.wdm/drivers/chromedriver/linux64/\"$$CHROME_VER\"/chromedriver-linux64; \
+      mkdir -p \"$$WDM_DIR\"; \
+      ln -sf /usr/bin/chromedriver \"$$WDM_DIR/chromedriver\"; \
+      tail -f /dev/null"
+    shm_size: 16gb
+    ports:
+      - "8000:8000" 
+      - "5900:5900"
+    volumes:
+    - .:/app
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/mydb
+      # Database configuration for Python apps
+      - LIVE_REM_DB_HOST=db
+      - LIVE_REM_DB_USER=user
+      - LIVE_REM_DB_PASSWORD=pass
+      - LIVE_REM_DB_NAME=mydb
+      - LIVE_REM_DB_PORT=5432
+      # Project path
+      - PROJECT_PATH=/app
+      - MODEL_NAME=qwen3-vl:2b-instruct
+      - OLLAMA_BASE_URL=http://ollama:11434
+      # Enable headless Chromium usage for Selenium/Playwright that expect a DISPLAY
+      - DISPLAY=:100
+      - CHROME_BIN=/usr/bin/chromium
+      - CHROMEDRIVER=/usr/bin/chromedriver
+    depends_on:
+      db:
+        condition: service_started
+      ollama:
+        condition: service_healthy
+      ollama-warmup:
+        condition: service_completed_successfully
+
+  db:
+    image: postgres:16
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: mydb
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./config/sql_scheme.sql:/docker-entrypoint-initdb.d/sql_scheme.sql
+
+  ollama:
+    image: ollama/ollama:0.12.9
+    container_name: ollama
+    restart: unless-stopped
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+      - OLLAMA_ORIGINS=*
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "OLLAMA_HOST=http://127.0.0.1:11434 ollama list >/dev/null 2>&1"]
+      interval: 30s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  ollama-init:
+    image: ollama/ollama:0.12.9
+    container_name: ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["sleep 5 && ollama pull qwen3-vl:2b-instruct"]
+
+  ollama-warmup:
+    image: curlimages/curl:8.5.0
+    container_name: ollama-warmup
+    depends_on:
+      ollama:
+        condition: service_healthy
+      ollama-init:
+        condition: service_completed_successfully
+    command: >
+      sh -lc "
+        set -euo pipefail;
+        until curl -sS http://ollama:11434/api/tags | grep -q '\"name\":\"qwen3-vl:2b-instruct\"'; do
+          echo 'Waiting for model qwen3-vl:2b-instruct to be present...';
+          sleep 2;
+        done;
+        echo 'Warming model...';
+        until curl -sS -X POST http://ollama:11434/api/generate -H 'Content-Type: application/json' -d '{\"model\":\"qwen3-vl:2b-instruct\",\"prompt\":\"hi\",\"stream\":false}' | grep -q 'response'; do
+          echo 'Waiting for generation to succeed...';
+          sleep 2;
+        done;
+        echo 'Model ready.'"
+
+volumes:
+  pgdata:
+  ollama_data:
+

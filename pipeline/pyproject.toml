@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "pipeline"
+version = "0.1.0"
+description = "Pipeline orchestration for LeakyLinks"
+authors = ["The Author"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+psycopg2 = "^2.9.10"
+psutil = "^5.9.0"
+pytz = "^2024.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+

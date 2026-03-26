@@ -1,0 +1,4 @@
+Analyze this screenshot and determine if it contains sensitive personal information. Base your decision only on what is visible; do not infer beyond the image.
+
+Provide your analysis in JSON format.
+
