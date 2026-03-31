@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+message: If you use this software, please cite both the article from preferred-citation and the software itself.
+authors:
+  - family-names: Mustafa
+    given-names: Ali
+    affiliation: CISPA Helmholtz Center for Information Security, Germany
+  - family-names: Rautenstrauch
+    given-names: Jannis
+    affiliation: CISPA Helmholtz Center for Information Security, Germany
+  - family-names: Hantke
+    given-names: Florian
+    affiliation: CISPA Helmholtz Center for Information Security, Germany
+  - family-names: Agarwal
+    given-names: Shubham
+    affiliation: Max Planck Institute for Security and Privacy, Germany
+  - family-names: Calzavara
+    given-names: Stefano
+    affiliation: Università Ca' Foscari Venezia, Italy
+  - family-names: Stock
+    given-names: Ben
+    affiliation: CISPA Helmholtz Center for Information Security, Germany
+title: 'LeakyLinks: Measuring the Security and Privacy Risks of URL Scanning Services'
+version: 1.0.0
+date-released: '2026-04-01'
+preferred-citation:
+  authors:
+    - family-names: Mustafa
+      given-names: Ali
+    - family-names: Rautenstrauch
+      given-names: Jannis
+    - family-names: Hantke
+      given-names: Florian
+    - family-names: Agarwal
+      given-names: Shubham
+    - family-names: Calzavara
+      given-names: Stefano
+    - family-names: Stock
+      given-names: Ben
+  title: 'LeakyLinks: Measuring the Security and Privacy Risks of URL Scanning Services'
+  type: conference-paper
+  year: '2026'
+  collection-title: IEEE Symposium on Security and Privacy

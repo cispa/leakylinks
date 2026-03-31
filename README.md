@@ -128,4 +128,13 @@ Ali Mustafa — ali.mustafa@cispa.de
 
 ## Citation
 
-Citation will be available after publication.
+The paper will be available at the IEEE Computer Society Digital Library after publication.
+
+```bibtex
+@inproceedings{mustafa2026leakylinks,
+  author = {Mustafa, Ali and Rautenstrauch, Jannis and Hantke, Florian and Agarwal, Shubham and Calzavara, Stefano and Stock, Ben},
+  booktitle = {IEEE Symposium on Security and Privacy},
+  title = {{LeakyLinks: Measuring the Security and Privacy Risks of URL Scanning Services}},
+  year = {2026},
+}
+```
